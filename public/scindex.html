@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    議價
+    <button id="join-room">加入room</button>
+    <button id="leave-room">離開room</button>
+    <form id="supplier-form">
+      <input name="price" placeholder="Price" /><br />
+      <input name="creditTerm" placeholder="Credit term" /><br />
+      <input
+        id="creditLine"
+        name="creditLine"
+        placeholder="Credit line"
+        disabled
+      /><br />
+      <input id="amount" name="amount" placeholder="Amount" disabled /><br />
+      <button>確認</button>
+    </form>
+    <form id="retailer-form">
+      <input id="price1" name="price1" placeholder="Price" disabled /><br />
+      <input
+        id="creditTerm1"
+        name="creditTerm1"
+        placeholder="Credit term"
+        disabled
+      /><br />
+      <input
+        id="creditLine1"
+        name="creditLine1"
+        placeholder="Credit line"
+      /><br />
+      <input id="amount1" name="amount1" placeholder="Amount" /><br />
+      <button>確認</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
+  </body>
+</html>
