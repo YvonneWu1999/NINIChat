@@ -12,6 +12,8 @@ const messageTemplate = document.querySelector('#message-template').innerHTML
 const messageTemplateOther = document.querySelector('#message-template-other').innerHTML
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML
 const locationMessageTemplateOther = document.querySelector('#location-message-template-other').innerHTML
+const imageMessageTemplate = document.querySelector('#image-message-template').innerHTML
+const imageMessageTemplateOther = document.querySelector('#image-message-template-other').innerHTML
 const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML
 
 // Options
@@ -57,6 +59,7 @@ socket.on('message', (message) => {
     autoscroll()
 })
 
+
 socket.on('locationMessage', (message) => {
     console.log(message)
     if (message.username.toLowerCase() === username.trim().toLowerCase()) {
@@ -76,6 +79,27 @@ socket.on('locationMessage', (message) => {
     }
     autoscroll()
 })
+//Client receive
+socket.on('receiveImage', function (message) {
+    console.log(message.path)
+    if (message.username.toLowerCase() === username.trim().toLowerCase()) {
+        const html = Mustache.render(imageMessageTemplate, {
+            username: message.username,
+            path: message.path,
+            createdAt: moment(message.createdAt).format('h:mm a')
+        })
+        $messages.insertAdjacentHTML('beforeend', html)
+    } else {
+        const html = Mustache.render(imageMessageTemplateOther, {
+            username: message.username,
+            path: message.path,
+            createdAt: moment(message.createdAt).format('h:mm a')
+        })
+        $messages.insertAdjacentHTML('beforeend', html)
+    }
+    autoscroll()
+})
+
 
 socket.on('roomData', ({ room, users }) => {
     const html = Mustache.render(sidebarTemplate, {
@@ -84,6 +108,9 @@ socket.on('roomData', ({ room, users }) => {
     })
     document.querySelector('#sidebar').innerHTML = html
 })
+
+
+
 $messageFormInput.addEventListener("input", () => {
     if ($messageFormInput.value.length == 0) {
         $messageFormButton.disabled = true
@@ -92,7 +119,16 @@ $messageFormInput.addEventListener("input", () => {
     }
 
 })
+document.getElementById('file').addEventListener('change', function () {
 
+    const reader = new FileReader();
+    reader.onload = function () {
+        // const base64 = this.result.replace(/.*base64,/, '');
+        socket.emit('image', this.result);
+    };
+    reader.readAsDataURL(this.files[0]);
+
+}, false);
 $messageForm.addEventListener('submit', (e) => {
     //prevent page refresh
     e.preventDefault()

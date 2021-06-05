@@ -29,6 +29,7 @@ input {
   outline: none;
 }
 button {
+  margin-right: 12px;
   cursor: pointer;
   padding: 12px;
   background: #f1dd38;
@@ -114,7 +115,8 @@ p {
   border-radius: 25px;
   position: relative;
   color: white;
-  text-align: center;
+  word-wrap: break-word;
+  /* text-align: center; */
 }
 .me {
   background-color: #ff3cac;
@@ -134,11 +136,12 @@ p {
 .message__name {
   font-weight: 600;
   font-size: 14px;
-  margin-right: 8px;
+  /* margin-right: 6px; */
 }
 .message__meta {
   color: #777;
   font-size: 14px;
+  /* margin-right: 6px; */
 }
 .message a {
   color: #0070cc;
@@ -184,5 +187,6 @@ p {
 .users {
   list-style-type: none;
   font-weight: 300;
+  color: #ff1493;
   padding: 12px 24px 0;
 }
