@@ -82,10 +82,12 @@ socket.on('locationMessage', (message) => {
 //Client receive
 socket.on('receiveImage', function (message) {
     console.log(message.path)
+    const id = message.path.split('/')[2].split('.')[0]
     if (message.username.toLowerCase() === username.trim().toLowerCase()) {
         const html = Mustache.render(imageMessageTemplate, {
             username: message.username,
             path: message.path,
+            id,
             createdAt: moment(message.createdAt).format('h:mm a')
         })
         $messages.insertAdjacentHTML('beforeend', html)
@@ -93,10 +95,40 @@ socket.on('receiveImage', function (message) {
         const html = Mustache.render(imageMessageTemplateOther, {
             username: message.username,
             path: message.path,
+            id,
             createdAt: moment(message.createdAt).format('h:mm a')
         })
         $messages.insertAdjacentHTML('beforeend', html)
     }
+    $('img[' + id + ']').addClass('img-enlargeable').click(function () {
+        var src = $(this).attr('src')
+        var modal
+
+        function removeModal() {
+            modal.remove();
+            $('body').off('keyup.modal-close')
+        }
+        modal = $('<div>').css({
+            background: 'RGBA(0,0,0,.5) url(' + src + ') no-repeat center',
+            backgroundSize: 'contain',
+            width: '100%',
+            height: '100%',
+            position: 'fixed',
+            zIndex: '10000',
+            top: '0',
+            left: '0',
+            cursor: 'zoom-out'
+        }).click(function () {
+            removeModal();
+        }).appendTo('body');
+        //handling ESC
+        $('body').on('keyup.modal-close', function (e) {
+            if (e.key === 'Escape') {
+                removeModal()
+            }
+        })
+    })
+
     autoscroll()
 })
 
@@ -109,7 +141,16 @@ socket.on('roomData', ({ room, users }) => {
     document.querySelector('#sidebar').innerHTML = html
 })
 
-
+// join room again if user disconnect
+socket.on("disconnect", () => {
+    socket.connect()
+    socket.emit('join', { username, room }, (error) => {
+        if (error) {
+            alert(error)
+            location.href = '/'
+        }
+    })
+})
 
 $messageFormInput.addEventListener("input", () => {
     if ($messageFormInput.value.length == 0) {
@@ -162,9 +203,12 @@ $sendLocationButton.addEventListener('click', () => {
         })
     })
 })
+
 socket.emit('join', { username, room }, (error) => {
     if (error) {
         alert(error)
         location.href = '/'
     }
 })
+
+

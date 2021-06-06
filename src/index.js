@@ -17,7 +17,7 @@ const port = process.env.PORT || 3000
 const publicDirectoryPath = path.join(__dirname, '../public')
 app.use(express.static(publicDirectoryPath))
 
-
+let pics = []
 /*litening a given event to occur
 server (emit) => client (receive) - countUpdated
 client (emit) => server (receive) - increment
@@ -95,7 +95,14 @@ function randomString(length) {
     for (var i = 0; i < length; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
-    return text;
+    const existingText = pics.find((pic) => {
+        return text === pic
+    })
+    if (existingText) {
+        randomString(length)
+    }
+    pics.push(text)
+    return text
 }
 function getBase64Image(imgData) {
     return imgData.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
