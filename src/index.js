@@ -16,8 +16,15 @@ const io = socketio(server)
 const port = process.env.PORT || 3000
 const publicDirectoryPath = path.join(__dirname, '../public')
 app.use(express.static(publicDirectoryPath))
-
+const cloudinary = require('cloudinary')
+let streamifier = require('streamifier');
 let pics = []
+require('dotenv').config()
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+});
 /*litening a given event to occur
 server (emit) => client (receive) - countUpdated
 client (emit) => server (receive) - increment
@@ -68,17 +75,49 @@ io.on('connection', (socket) => {
             case "jpeg": ext = ".jpg"; break;
             default: ext = ".bin"; break;
         }
+
         const buffer = Buffer.from(getBase64Image(image), 'base64');
         var savedFilename = "/uploads/" + randomString(10) + ext;
-        fs.writeFile(publicDirectoryPath + savedFilename, buffer, 'base64', function (err) {
-            if (err !== null) {
-                console.log(err)
-            }
-            else {
-                io.to(user.room).emit("receiveImage", generateImageMessage(user.username, savedFilename))
-                console.log("Send image success!");
-            }
-        });
+        // fs.writeFile(publicDirectoryPath + savedFilename, buffer, 'base64', function (err) {
+        //     if (err !== null) {
+        //         console.log(err)
+        //     }
+        //     else {
+        //         io.to(user.room).emit("receiveImage", generateImageMessage(user.username, savedFilename))
+        //         console.log("Send image success!");
+        //     }
+        // });
+        let streamUpload = () => {
+
+            return new Promise((resolve, reject) => {
+
+                let stream = cloudinary.uploader.upload_stream(
+
+                    (result) => {
+
+                        if (result) {
+
+                            resolve(result);
+
+                        } else {
+
+                            reject(error);
+
+                        }
+
+                    }
+
+                );
+
+                streamifier.createReadStream(buffer).pipe(stream);
+
+            });
+
+        };
+        let result = await streamUpload();
+        console.log(result.url);
+        io.to(user.room).emit("receiveImage", generateImageMessage(user.username, result.url))
+        console.log("Send image success! from clodinary!");
     });
     socket.on('disconnect', () => {
         const user = removeUser(socket.id)
